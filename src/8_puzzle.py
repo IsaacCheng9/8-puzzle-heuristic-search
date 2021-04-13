@@ -8,7 +8,7 @@ from copy import deepcopy
 import numpy as np
 
 
-def choose_heuristic():
+def choose_heuristic() -> str:
     """
     Gets the user to select either the Manhattan or Hamming Distance heuristic.
 
@@ -142,7 +142,6 @@ def search(heuristic, start, goal):
         goal: The desired state of the board.
 
     Returns:
-
         The states of the board, and how many states were explored.
     """
     # Sets the rules for the moves a tile can make, and when it can do them.
@@ -235,13 +234,13 @@ def main():
 
     # Stops the program if the 8-puzzle is unsolvable.
     if is_solvable(start) is False:
-        print("The 8-puzzle problem is unsolvable with this start state!")
+        print("\nThe 8-puzzle problem is unsolvable with this start state!")
         return
 
     state, explored = search(heuristic, start, goal)
     optimal = generate_steps(state)
-    print(("{}\nTotal States Generated: {}\nTotal States Explored: {}"
-           "\nTotal Steps for Optimal Solution: {}").format(
+    print(("{}\n\nTotal States Generated: {}\nTotal States Explored: {}"
+           "\nNumber of Steps for Optimal Solution: {}").format(
         optimal, len(state), len(state) - explored, len(optimal) - 1))
 
 
