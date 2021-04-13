@@ -39,9 +39,9 @@ def choose_states():
     Returns:
         The start state and desired goal state of the board.
     """
-    start = np.array([7, 2, 4, 5, 0, 6, 8, 3, 1])
-    goal = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8])
-    return goal, start
+    start = np.array([0, 2, 3, 7, 1, 4, 8, 5, 6])
+    goal = np.array([1, 2, 3, 4, 5, 6, 7, 8, 0])
+    return start, goal
 
 
 def is_solvable(start) -> bool:
@@ -91,8 +91,9 @@ def calculate_heuristic(heuristic, current, goal) -> int:
         The value of h(n) according to the heuristic algorithm used.
     """
     if heuristic == "Manhattan":
-        current = assign_coordinates(current)
-        result = manhattan_heuristic(current, goal)
+        current_c = assign_coordinates(current)
+        goal_c = assign_coordinates(goal)
+        result = manhattan_heuristic(current_c, goal_c)
     else:
         result = hamming_heuristic(current, goal)
     return result
@@ -223,8 +224,6 @@ def setup_search(heuristic, start, goal):
     # Creates a dictionary to keep track of boards which have been processed.
     previous_boards = defaultdict(bool)
     # Processes the start position of the board.
-    if heuristic == "Manhattan":
-        goal = assign_coordinates(goal)
     h_function = calculate_heuristic(heuristic, start, goal)
     state = np.array([(start, -1, 0, h_function)],
                      dtype=state_type)
@@ -239,7 +238,7 @@ def generate_steps(state):
     Generates the step-by-step solution to reach the goal state.
 
     Args:
-        state:
+        state: A record of the state of each 3x3 board.
 
     Returns:
         The state of the 3x3 board after each step to the goal state.
@@ -258,7 +257,7 @@ def main():
     Runs the A* algorithm to solve the 8-puzzle problem.
     """
     heuristic = choose_heuristic()
-    goal, start = choose_states()
+    start, goal = choose_states()
     print(("{} Distance heuristic chosen.\nStart State: {}"
            "\nGoal State: {}").format(heuristic, start, goal))
 
