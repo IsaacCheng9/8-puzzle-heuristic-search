@@ -32,6 +32,23 @@ def choose_heuristic():
             return "Hamming"
 
 
+def is_solvable(start) -> bool:
+    """
+    Checks whether the 8-puzzle problem is solvable based on inversions.
+
+    Args:
+        start: The start state of the board input by the user.
+
+    Returns:
+        Whether the 8-puzzle problem is solvable.
+    """
+    k = start[start != 0]
+    num_inversions = sum(
+        len(np.array(np.where(k[i + 1:] < k[i])).reshape(-1)) for i in
+        range(len(k) - 1))
+    return num_inversions % 2 == 0
+
+
 def assign_coordinates(board):
     """
     Assigns coordinates to each digit to calculate the Manhattan Distance.
@@ -215,6 +232,11 @@ def main():
     goal = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8])
     print(("{} Distance heuristic chosen.\nStart State: {}"
            "\nGoal State: {}").format(heuristic, start, goal))
+
+    # Stops the program if the 8-puzzle is unsolvable.
+    if is_solvable(start) is False:
+        print("The 8-puzzle problem is unsolvable with this start state!")
+        return
 
     state, explored = search(heuristic, start, goal)
     optimal = generate_steps(state)
