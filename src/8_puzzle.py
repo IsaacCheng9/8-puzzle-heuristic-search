@@ -127,25 +127,6 @@ def hamming_heuristic(current, goal) -> int:
     return np.sum(current != goal) - 1
 
 
-def generate_steps(state):
-    """
-    Generates the step-by-step solution to reach the goal state.
-
-    Args:
-        state:
-
-    Returns:
-        The state of the 3x3 board after each step to the goal state.
-    """
-    # Creates an array of integers to display each board state.
-    optimal = np.array([], int)
-    last = len(state) - 1
-    while last != -1:
-        optimal = np.insert(optimal, 0, state[last]["board"])
-        last = int(state[last]["parent"])
-    return optimal.reshape(-1, 3, 3)
-
-
 def search(heuristic, start, goal):
     """
     Performs the A* search on the 8-puzzle problem.
@@ -251,6 +232,25 @@ def setup_search(heuristic, start, goal):
 
     return (goal, moves, previous_boards, priority, priority_queue_type,
             state, state_type)
+
+
+def generate_steps(state):
+    """
+    Generates the step-by-step solution to reach the goal state.
+
+    Args:
+        state:
+
+    Returns:
+        The state of the 3x3 board after each step to the goal state.
+    """
+    # Creates an array of integers to display each board state.
+    optimal = np.array([], int)
+    last = len(state) - 1
+    while last != -1:
+        optimal = np.insert(optimal, 0, state[last]["board"])
+        last = int(state[last]["parent"])
+    return optimal.reshape(-1, 3, 3)
 
 
 def main():
