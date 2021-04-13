@@ -39,7 +39,7 @@ def choose_states():
     Returns:
         The start state and desired goal state of the board.
     """
-    start = np.array([0, 2, 3, 7, 1, 4, 8, 5, 6])
+    start = np.array([0, 7, 2, 3, 1, 4, 8, 5, 6])
     goal = np.array([1, 2, 3, 4, 5, 6, 7, 8, 0])
     return start, goal
 
