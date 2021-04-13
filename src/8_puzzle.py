@@ -32,6 +32,18 @@ def choose_heuristic() -> str:
             return "Hamming"
 
 
+def choose_states():
+    """
+    Creates the start and goal states for the 8-puzzle problem.
+
+    Returns:
+        The start state and desired goal state of the board.
+    """
+    start = np.array([7, 2, 4, 5, 0, 6, 8, 3, 1])
+    goal = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8])
+    return goal, start
+
+
 def is_solvable(start) -> bool:
     """
     Checks whether the 8-puzzle problem is solvable based on inversions.
@@ -146,31 +158,8 @@ def search(heuristic, start, goal):
     Returns:
         The states of the board, and how many states were explored.
     """
-    # Sets the rules for the moves a tile can make, and when it can do them.
-    moves = np.array([("up", [0, 1, 2], -3),
-                      ("down", [6, 7, 8], 3),
-                      ("left", [0, 3, 6], -1),
-                      ("right", [2, 5, 8], 1)],
-                     dtype=[("move", str, 1),
-                            ("position", list),
-                            ("delta", int)])
-    # Creates the data structures for board state and priority queue.
-    state_type = [("board", list),
-                  ("parent", int),
-                  ("g_function", int),
-                  ("h_function", int)]
-    priority_queue_type = [("position", int),
-                           ("f_function", int)]
-    # Creates a dictionary to keep track of boards which have been processed.
-    previous_boards = defaultdict(bool)
-
-    # Processes the start position of the board.
-    if heuristic == "Manhattan":
-        goal = assign_coordinates(goal)
-    h_function = calculate_heuristic(heuristic, start, goal)
-    state = np.array([(start, -1, 0, h_function)],
-                     dtype=state_type)
-    priority = np.array([(0, h_function)], dtype=priority_queue_type)
+    (goal, moves, previous_boards, priority, priority_queue_type,
+     state, state_type) = setup_search(heuristic, start, goal)
 
     # Searches until the goal state is found.
     while True:
@@ -223,13 +212,53 @@ def search(heuristic, start, goal):
                     return state, len(priority)
 
 
+def setup_search(heuristic, start, goal):
+    """
+    Sets up the valid moves, priority queue, and state tracking for the search.
+
+    Args:
+        heuristic: Algorithm used to estimate the cost of reaching the goal.
+        start: The start state of the board input by the user.
+        goal: The desired state of the board.
+
+    Returns:
+        A record of valid moves, priority queue, and states.
+    """
+    # Sets the rules for the moves a tile can make, and when it can do them.
+    moves = np.array([("up", [0, 1, 2], -3),
+                      ("down", [6, 7, 8], 3),
+                      ("left", [0, 3, 6], -1),
+                      ("right", [2, 5, 8], 1)],
+                     dtype=[("move", str, 1),
+                            ("position", list),
+                            ("delta", int)])
+    # Creates the data structures for board state and priority queue.
+    state_type = [("board", list),
+                  ("parent", int),
+                  ("g_function", int),
+                  ("h_function", int)]
+    priority_queue_type = [("position", int),
+                           ("f_function", int)]
+    # Creates a dictionary to keep track of boards which have been processed.
+    previous_boards = defaultdict(bool)
+    # Processes the start position of the board.
+    if heuristic == "Manhattan":
+        goal = assign_coordinates(goal)
+    h_function = calculate_heuristic(heuristic, start, goal)
+    state = np.array([(start, -1, 0, h_function)],
+                     dtype=state_type)
+    priority = np.array([(0, h_function)], dtype=priority_queue_type)
+
+    return (goal, moves, previous_boards, priority, priority_queue_type,
+            state, state_type)
+
+
 def main():
     """
     Runs the A* algorithm to solve the 8-puzzle problem.
     """
     heuristic = choose_heuristic()
-    start = np.array([7, 2, 4, 5, 0, 6, 8, 3, 1])
-    goal = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8])
+    goal, start = choose_states()
     print(("{} Distance heuristic chosen.\nStart State: {}"
            "\nGoal State: {}").format(heuristic, start, goal))
 
