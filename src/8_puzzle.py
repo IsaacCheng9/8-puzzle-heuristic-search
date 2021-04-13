@@ -60,6 +60,7 @@ def assign_coordinates(board):
         Coordinates to calculate the Manhattan Distance.
     """
     coordinate = np.array(range(9))
+    # Gets the index of each value, where the board is the array of values.
     for x, y in enumerate(board):
         coordinate[y] = x
     return coordinate
@@ -78,6 +79,7 @@ def calculate_heuristic(heuristic, current, goal) -> int:
         The value of h(n) according to the heuristic algorithm used.
     """
     if heuristic == "Manhattan":
+        current = assign_coordinates(current)
         result = manhattan_heuristic(current, goal)
     else:
         result = hamming_heuristic(current, goal)
@@ -155,17 +157,17 @@ def search(heuristic, start, goal):
     # Creates the data structures for board state and priority queue.
     state_type = [("board", list),
                   ("parent", int),
-                  ("gn", int),
-                  ("hn", int)]
+                  ("g_function", int),
+                  ("h_function", int)]
     priority_queue_type = [("position", int),
                            ("f_function", int)]
     # Creates a dictionary to keep track of boards which have been processed.
     previous_boards = defaultdict(bool)
 
     # Processes the start position of the board.
-    start_c = assign_coordinates(start)
-    goal_c = assign_coordinates(goal)
-    h_function = calculate_heuristic(heuristic, start_c, goal_c)
+    if heuristic == "Manhattan":
+        goal = assign_coordinates(goal)
+    h_function = calculate_heuristic(heuristic, start, goal)
     state = np.array([(start, -1, 0, h_function)],
                      dtype=state_type)
     priority = np.array([(0, h_function)], dtype=priority_queue_type)
@@ -201,8 +203,7 @@ def search(heuristic, start, goal):
 
                 # Calculates the estimated cost of reaching the goal state from
                 # the current state of the board using the chosen heuristic.
-                h_function = calculate_heuristic(
-                    heuristic, assign_coordinates(new_state), goal_c)
+                h_function = calculate_heuristic(heuristic, new_state, goal)
                 # Generates and adds the new board state.
                 new_state_details = np.array(
                     [(new_state, position, g_function, h_function)],
