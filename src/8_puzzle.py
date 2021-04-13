@@ -1,3 +1,7 @@
+"""
+A program to solve the 8-puzzle problem using the A* algorithm and either the
+Manhattan Distance heuristic or the Hamming Distance heuristic.
+"""
 from collections import defaultdict
 from copy import deepcopy
 
@@ -100,17 +104,31 @@ def generate_steps(state):
         state:
 
     Returns:
-        The state of the board after each step leading to the goal state.
+        The state of the 3x3 board after each step to the goal state.
     """
-    optimal = np.array([], int).reshape(-1, 9)
+    # Creates an array of integers to display each board state.
+    optimal = np.array([], int)
     last = len(state) - 1
     while last != -1:
-        optimal = np.insert(optimal, 0, state[last]["board"], 0)
+        optimal = np.insert(optimal, 0, state[last]["board"])
         last = int(state[last]["parent"])
     return optimal.reshape(-1, 3, 3)
 
 
 def search(heuristic, start, goal):
+    """
+    Performs the A* search on the 8-puzzle problem.
+
+    Args:
+        heuristic: Algorithm used to estimate the cost of reaching the goal.
+        start: The start state of the board input by the user.
+        goal: The desired state of the board.
+
+    Returns:
+
+        The states of the board, and how many states were explored.
+    """
+    # Sets the rules for the moves a tile can make, and when it can do them.
     moves = np.array([("up", [0, 1, 2], -3),
                       ("down", [6, 7, 8], 3),
                       ("left", [0, 3, 6], -1),
@@ -118,28 +136,27 @@ def search(heuristic, start, goal):
                      dtype=[("move", str, 1),
                             ("position", list),
                             ("delta", int)])
-    state_record = [("board", list),
-                    ("parent", int),
-                    ("gn", int),
-                    ("hn", int)]
-    # Creates the priority queue.
-    dt_priority = [("position", int),
-                   ("f_function", int)]
-
+    # Creates the data structures for board state and priority queue.
+    state_type = [("board", list),
+                  ("parent", int),
+                  ("gn", int),
+                  ("hn", int)]
+    priority_queue_type = [("position", int),
+                           ("f_function", int)]
+    # Creates a dictionary to keep track of boards which have been processed.
     previous_boards = defaultdict(bool)
+
+    # Processes the start position of the board.
     start_c = assign_coordinates(start)
     goal_c = assign_coordinates(goal)
-    print(start_c)
-    print(goal_c)
-
     h_function = calculate_heuristic(heuristic, start_c, goal_c)
     state = np.array([(start, -1, 0, h_function)],
-                     state_record)
-    priority = np.array([(0, h_function)], dt_priority)
+                     dtype=state_type)
+    priority = np.array([(0, h_function)], dtype=priority_queue_type)
 
     # Searches until the goal state is found.
     while True:
-        # Sorts the priority queue.
+        # Sorts the priority queue according to the total cost.
         priority = np.sort(priority, kind="mergesort",
                            order=["f_function", "position"])
         # Explores the first node from the priority queue, and removes it from
@@ -150,7 +167,9 @@ def search(heuristic, start, goal):
         g_function = state[position][2] + 1
         location = int(np.where(board == 0)[0])
 
+        # Checks all possible moves which can be made from the current state.
         for move in moves:
+            # Performs the move if it is valid.
             if location not in move["position"]:
                 # Copies the current state of the board.
                 new_state = deepcopy(board)
@@ -164,18 +183,21 @@ def search(heuristic, start, goal):
                     continue
                 previous_boards[tuple(new_state)] = True
 
+                # Calculates the estimated cost of reaching the goal state from
+                # the current state of the board using the chosen heuristic.
                 h_function = calculate_heuristic(
                     heuristic, assign_coordinates(new_state), goal_c)
-                # Generates and adds the new state to the queue.
-                queue = np.array(
+                # Generates and adds the new board state.
+                new_state_details = np.array(
                     [(new_state, position, g_function, h_function)],
-                    state_record)
-                state = np.append(state, queue, 0)
+                    dtype=state_type)
+                state = np.append(state, new_state_details, 0)
                 # Calculates the total cost, and adds the new state to the
                 # priority queue.
                 f_function = g_function + h_function
-                queue = np.array([(len(state) - 1, f_function)], dt_priority)
-                priority = np.append(priority, queue, 0)
+                new_state_details = np.array([(len(state) - 1, f_function)],
+                                             dtype=priority_queue_type)
+                priority = np.append(priority, new_state_details, 0)
 
                 # Stops the search if the goal state has been achieved.
                 if np.array_equal(new_state, goal):
@@ -191,16 +213,14 @@ def main():
     heuristic = choose_heuristic()
     start = np.array([7, 2, 4, 5, 0, 6, 8, 3, 1])
     goal = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8])
-    print(heuristic, "Distance heuristic chosen.\nStart State:", start,
-          "\nGoal State:", goal)
+    print(("{} Distance heuristic chosen.\nStart State: {}"
+           "\nGoal State: {}").format(heuristic, start, goal))
 
     state, explored = search(heuristic, start, goal)
-    print(state)
     optimal = generate_steps(state)
-    print(optimal)
-    print("\nTotal States Generated:", len(state), "\nTotal States Explored:",
-          len(state) - explored, "\nTotal Steps for Optimal Solution:",
-          len(optimal) - 1)
+    print(("{}\nTotal States Generated: {}\nTotal States Explored: {}"
+           "\nTotal Steps for Optimal Solution: {}").format(
+        optimal, len(state), len(state) - explored, len(optimal) - 1))
 
 
 if __name__ == "__main__":
